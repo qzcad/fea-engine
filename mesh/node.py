@@ -16,9 +16,10 @@ class NodeType(Enum):
 
 
 class Node:
-    def __init__(self, coords: Iterable[float], node_type: NodeType):
+    def __init__(self, coords: Iterable[float], node_type: NodeType, id: int):
         self._coords = np.array(coords, dtype=float)  # type: np.ndarray
         self._node_type = node_type
+        self._id = id
 
     @property
     def coords(self) -> np.ndarray:
@@ -63,8 +64,22 @@ class Node:
         if len(self._coords) > 2:
             self._coords[2] = v
 
-    def euclidean(self, node: Node):
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, i: int):
+        self._id = i
+
+    def to_node(self, node: Node):
         return distance.euclidean(self._coords, node._coords)
+
+    def to_point(self, coords: Iterable[float]):
+        return distance.euclidean(self._coords, coords)
 
     def vector(self, to_node: Node):
         return to_node._coords - self._coords
+
+    def __str__(self):
+        return f"{str(self._coords)}-{self._node_type}"
