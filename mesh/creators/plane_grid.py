@@ -30,7 +30,6 @@ class PlaneGridCreator(MeshCreator):
                     mesh.append_point(coords=(x[i], y[j]), node_type=node_type, check=False)
                 )
             nodes.append(row)
-        print("nodes")
         for i in range(self._num_x - 1):
             for j in range(self._num_y - 1):
                 mesh.append_element(

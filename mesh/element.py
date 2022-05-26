@@ -32,3 +32,11 @@ class Element:
         The method reverses the order of the nodes
         """
         self._nodes = list(reversed(self._nodes))
+
+    def __len__(self) -> int:
+        """
+        Calculates the number of nodes in the element.
+
+        :return: the number of nodes in the element
+        """
+        return len(self._nodes)
