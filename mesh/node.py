@@ -25,6 +25,10 @@ class Node:
     def coords(self) -> np.ndarray:
         return self._coords
 
+    @property
+    def vec3d(self) -> np.ndarray:
+        return np.array((self.x, self.y, self.z))
+
     @coords.setter
     def coords(self, c: Iterable[float]):
         self._coords = np.array(c, dtype=float)

@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
-from vtkmodules.vtkCommonCore import vtkPoints, vtkLookupTable, vtkFloatArray
+import numpy as np
+from vtkmodules.vtkCommonCore import vtkPoints, vtkLookupTable, vtkFloatArray, vtkDoubleArray
 from vtkmodules.vtkCommonDataModel import vtkCellArray, vtkPolygon, vtkPolyData
-from vtkmodules.vtkFiltersCore import vtkMaskPoints
+from vtkmodules.vtkFiltersCore import vtkMaskPoints, vtkPolyDataNormals, vtkGlyph3D
 from vtkmodules.vtkFiltersModeling import vtkBandedPolyDataContourFilter
+from vtkmodules.vtkFiltersSources import vtkArrowSource
 from vtkmodules.vtkInteractionWidgets import vtkScalarBarWidget
 from vtkmodules.vtkRenderingAnnotation import vtkAxesActor, vtkScalarBarActor
 from vtkmodules.vtkRenderingCore import vtkRenderer, vtkRenderWindow, vtkRenderWindowInteractor, vtkActor, \
@@ -20,7 +22,7 @@ from mesh.mesh import Mesh
 from render.renderer import Renderer
 
 
-class PlaneRenderer(Renderer):
+class PlaneVtkRenderer(Renderer):
     def __init__(
             self,
             window_name: str,
@@ -29,6 +31,7 @@ class PlaneRenderer(Renderer):
             background=(0.95, 0.95, 0.95),
             show_mesh: bool = True,
             mesh_color=(0.25, 0.25, 0.25),
+            show_normals: bool = True,
             show_axes: bool = True,
             values: Iterable[float] = [],
             contours_count: int = 0,
@@ -60,6 +63,7 @@ class PlaneRenderer(Renderer):
         self._bcf_mapper = vtkPolyDataMapper()
         self._show_mesh = show_mesh
         self._mesh_color = mesh_color
+        self._show_normals = show_normals
         if self._show_mesh:
             self._bcf_actor.GetProperty().EdgeVisibilityOn()
             self._bcf_actor.GetProperty().SetEdgeColor(self._mesh_color)
@@ -123,7 +127,46 @@ class PlaneRenderer(Renderer):
             else:
                 edge_actor.GetProperty().SetColor(0.0, 0.0, 0.0)
             self._renderer.AddActor(edge_actor)
+            if self._show_mesh and self._show_normals:
+                # show normals
+                # calculate normals
+                normals = vtkDoubleArray()
+                normals.SetName("normals")
+                normals.SetNumberOfComponents(3)
+                normals.SetNumberOfTuples(len(mesh.nodes))
+                for node_number, node in enumerate(mesh.nodes):
+                    elements = mesh.get_adjacent(node)
+                    n = np.array((0.0, 0.0, 0.0))
+                    for element in elements:
+                        neighbors = element.neighbors(node)
+                        n_ = np.cross(neighbors[0].vec3d - node.vec3d, neighbors[1].vec3d - node.vec3d)
+                        n_ = n_ / np.linalg.norm(n_)
+                        n += n_
+                    n = n / len(elements)
+                    n = n / np.linalg.norm(n)
+                    normals.SetTuple(node_number, list(n))
+                poly_data.GetPointData().AddArray(normals)
+                poly_data.GetPointData().SetActiveVectors("normals")
+                # normals = vtkPolyDataNormals()
+                # normals.SetInputData(poly_data)
+                arrow = vtkArrowSource()
+                glyph = vtkGlyph3D()
+                # glyph.SetInputConnection(normals.GetOutputPort())
+                glyph.SetInputData(poly_data)
+                glyph.SetSourceConnection(arrow.GetOutputPort())
+                # glyph.SetVectorModeToUseNormal()
+                glyph.SetScaleModeToScaleByVector()
+                glyph.SetScaleFactor(mesh.mean_edge_length() / 2.0)
+                glyph.OrientOn()
+                glyph.Update()
+                mapper2 = vtkPolyDataMapper()
+                mapper2.SetInputConnection(glyph.GetOutputPort())
+                actor2 = vtkActor()
+                actor2.SetMapper(mapper2)
+                actor2.GetProperty().SetColor(self._mesh_color)
+                self._renderer.AddActor(actor2)
             if self._show_labels:
+                # show labels
                 mask = vtkMaskPoints()
                 mask.SetInputData(bcf.GetOutput())
                 mask.SetOnRatio(
