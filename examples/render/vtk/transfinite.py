@@ -1,7 +1,7 @@
 from math import sin, pi, cos
 
 from mesh.creators.transfinite import TransfiniteGridCreator
-from render.vtk.plane import PlaneVtkRenderer
+from render.graphic.vtk.plane import PlaneVtkRenderer
 
 if __name__ == "__main__":
     R = 1.0

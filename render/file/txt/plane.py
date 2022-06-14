@@ -1,10 +1,10 @@
 from mesh.mesh import Mesh
-from render.renderer import Renderer
+from render.file.file_renderer import FileRenderer
 
 
-class PlaneTextRenderer(Renderer):
+class PlaneTextRenderer(FileRenderer):
     def __init__(self, filepath: str):
-        self._filepath = filepath
+        super().__init__(filepath)
 
     def render(self, mesh: Mesh):
         with open(self._filepath, "w") as text_file:

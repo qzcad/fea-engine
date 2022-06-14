@@ -1,11 +1,14 @@
 from math import sin, pi, cos, sqrt
 
+import numpy as np
+
 from mesh.creators.plane_grid import PlaneGridCreator
 from mesh.creators.transfinite import TransfiniteGridCreator
 from mesh.creators.union import SimpleUnion
 from mesh.node import NodeType
-from render.txt.plane import PlaneTextRenderer
-from render.vtk.plane import PlaneVtkRenderer
+from render.file.txt.plane import PlaneTextRenderer
+from render.file.vtk.plane import VtkXmlRenderer
+from render.graphic.vtk.plane import PlaneVtkRenderer
 
 
 def right_mesh(r: float, n: int):
@@ -71,7 +74,7 @@ if __name__ == "__main__":
     L = 16.105
     l2 = 2.122
     o2 = L - l2 - sqrt(R ** 2 - r ** 2)
-    N = 50
+    N = 25
     creator = SimpleUnion([central_mesh(r, N), right_mesh(r, N), top_mesh(r, N)])
     bottom = creator.create()
     top = bottom.copy()
@@ -119,3 +122,21 @@ if __name__ == "__main__":
     renderer.render(mesh)
     text_render = PlaneTextRenderer(f"tank_n{N}.txt")
     text_render.render(mesh)
+    xml_render = VtkXmlRenderer(f"tank_n{N}.vtp")
+    xml_render.add_point_scalar([mesh.power(n) for n in mesh.nodes], "power")
+    xml_render.add_point_scalar([n.x for n in mesh.nodes], "x")
+    xml_render.add_point_scalar([n.y for n in mesh.nodes], "y")
+    xml_render.add_point_scalar([n.z for n in mesh.nodes], "z")
+    normals = []
+    for node in mesh.nodes:
+        elements = mesh.get_adjacent(node)
+        n = np.array((0.0, 0.0, 0.0))
+        for element in elements:
+            neighbors = element.neighbors(node)
+            n_ = np.cross(neighbors[0].vec3d - node.vec3d, neighbors[1].vec3d - node.vec3d)
+            n_ = n_ / np.linalg.norm(n_)
+            n += n_
+        n = n / len(elements)
+        normals.append(tuple(n))
+    xml_render.add_point_vector(normals, "normals")
+    xml_render.render(mesh)
