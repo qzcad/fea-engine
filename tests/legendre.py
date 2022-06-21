@@ -6,7 +6,7 @@ from fem.quadrature.legendre import IntervalQuadrature, TriangleQuadrature, Tetr
 
 class TestLegendre(TestCase):
     def setUp(self) -> None:
-        self.max_order = 5
+        self.max_order = 6
 
     def test_interval(self):
         for order in range(self.max_order):

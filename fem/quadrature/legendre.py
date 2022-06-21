@@ -53,15 +53,26 @@ class TriangleQuadrature(Quadrature):
             ]
         elif self._order == 2:
             p = array([
-                QuadraturePoint([1.0 / 2.0,  1.0 / 2.0], 1.0 / 6.0),
-                QuadraturePoint([0.0,        1.0 / 2.0], 1.0 / 6.0),
-                QuadraturePoint([1.0 / 2.0,  0.0],       1.0 / 6.0)
+                QuadraturePoint([1.0 / 6.0, 1.0 / 6.0], 1.0 / 6.0),
+                QuadraturePoint([2.0 / 3.0, 1.0 / 6.0], 1.0 / 6.0),
+                QuadraturePoint([1.0 / 6.0, 2.0 / 3.0], 1.0 / 6.0)
+            ])
+        elif self.order == 3:
+            p = array([
+                QuadraturePoint([1.0 / 3.0, 1.0 / 3.0], -9.0 / 32.0),
+                QuadraturePoint([3.0 / 5.0, 1.0 / 5.0], 25.0 / 96.0),
+                QuadraturePoint([1.0 / 5.0, 3.0 / 5.0], 25.0 / 96.0),
+                QuadraturePoint([1.0 / 5.0, 1.0 / 5.0], 25.0 / 96.0)
             ])
         else:
             p = array([
-                QuadraturePoint([1.0 / 6.0,  1.0 / 6.0], 1.0 / 6.0),
-                QuadraturePoint([2.0 / 3.0,  1.0 / 6.0], 1.0 / 6.0),
-                QuadraturePoint([1.0 / 6.0,  2.0 / 3.0], 1.0 / 6.0)
+                QuadraturePoint([0.0, 0.0], 1.0 / 40.0),
+                QuadraturePoint([0.5, 0.0], 1.0 / 15.0),
+                QuadraturePoint([1.0, 0.0], 1.0 / 40.0),
+                QuadraturePoint([0.5, 0.5], 1.0 / 15.0),
+                QuadraturePoint([0.0, 1.0], 1.0 / 40.0),
+                QuadraturePoint([0.0, 0.5], 1.0 / 15.0),
+                QuadraturePoint([1.0 / 3.0, 1.0 / 3.0], 9.0 / 40.0)
             ])
         return p
 
@@ -74,12 +85,38 @@ class TetrahedronQuadrature(Quadrature):
             p = [
                 QuadraturePoint([0.25, 0.25, 0.25], 1.0 / 6.0)
             ]
-        else:
+        elif self.order == 2:
+            a = (5.0 + 3.0 * sqrt(5.0)) / 20.0
+            b = (5.0 - sqrt(5.0)) / 20.0
             p = [
-                QuadraturePoint([(5.0 + 3.0 * sqrt(5.0)) / 20.0, (5.0 - sqrt(5.0)) / 20.0, (5.0 - sqrt(5.0)) / 20.0], 0.25 / 6.0),
-                QuadraturePoint([(5.0 - sqrt(5.0)) / 20.0, (5.0 + 3.0 * sqrt(5.0)) / 20.0, (5.0 - sqrt(5.0)) / 20.0], 0.25 / 6.0),
-                QuadraturePoint([(5.0 - sqrt(5.0)) / 20.0, (5.0 - sqrt(5.0)) / 20.0, (5.0 + 3.0 * sqrt(5.0)) / 20.0], 0.25 / 6.0),
-                QuadraturePoint([(5.0 - sqrt(5.0)) / 20.0, (5.0 - sqrt(5.0)) / 20.0, (5.0 - sqrt(5.0)) / 20.0],       0.25 / 6.0)
+                QuadraturePoint([a, b, b], 0.25 / 6.0),
+                QuadraturePoint([b, a, b], 0.25 / 6.0),
+                QuadraturePoint([b, b, a], 0.25 / 6.0),
+                QuadraturePoint([b, b, b], 0.25 / 6.0)
+            ]
+        elif self.order == 3:
+            p = [
+                QuadraturePoint([1.0 / 4.0, 1.0 / 4.0, 1.0 / 4.0], -4.0 / 30.0),
+                QuadraturePoint([1.0 / 2.0, 1.0 / 6.0, 1.0 / 6.0], 9.0 / 120.0),
+                QuadraturePoint([1.0 / 6.0, 1.0 / 2.0, 1.0 / 6.0], 9.0 / 120.0),
+                QuadraturePoint([1.0 / 6.0, 1.0 / 6.0, 1.0 / 2.0], 9.0 / 120.0),
+                QuadraturePoint([1.0 / 6.0, 1.0 / 6.0, 1.0 / 6.0], 9.0 / 120.0)
+            ]
+        else:
+            a = (1.0 + sqrt(5.0 / 14.0)) / 4.0
+            b = (1.0 - sqrt(5.0 / 14.0)) / 4.0
+            p = [
+                QuadraturePoint([1.0 / 4.0, 1.0 / 4.0, 1.0 / 4.0], -74.0 / 5625.0),
+                QuadraturePoint([11.0 / 14.0, 1.0 / 14.0, 1.0 / 14.0], 343.0 / 45000.0),
+                QuadraturePoint([1.0 / 14.0, 11.0 / 14.0, 1.0 / 14.0], 343.0 / 45000.0),
+                QuadraturePoint([1.0 / 14.0, 1.0 / 14.0, 11.0 / 14.0], 343.0 / 45000.0),
+                QuadraturePoint([1.0 / 14.0, 1.0 / 14.0, 1.0 / 14.0], 343.0 / 45000.0),
+                QuadraturePoint([a, a, b], 56.0 / 2250.0),
+                QuadraturePoint([a, b, a], 56.0 / 2250.0),
+                QuadraturePoint([b, a, a], 56.0 / 2250.0),
+                QuadraturePoint([a, b, b], 56.0 / 2250.0),
+                QuadraturePoint([b, a, b], 56.0 / 2250.0),
+                QuadraturePoint([b, b, a], 56.0 / 2250.0)
             ]
         return p
 
