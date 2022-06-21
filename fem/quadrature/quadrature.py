@@ -11,23 +11,28 @@ class QuadraturePoint:
 
     @property
     def point(self):
+        """Coordinates of the quadrature point"""
         return self._point
 
     @property
     def weight(self):
+        """The weight value of the quadrature point"""
         return self._weight
 
     @property
     def xi(self):
+        """The first coordinate point of the quadrature point"""
         return self._point[0]
 
     @property
     def eta(self):
+        """The second coordinate point of the quadrature point"""
         return self._point[1]
 
     @property
     def mu(self):
-        return self._point[3]
+        """The third coordinate point of the quadrature"""
+        return self._point[2]
 
     @property
     def dimension(self):

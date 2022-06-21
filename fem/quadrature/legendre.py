@@ -74,20 +74,12 @@ class TetrahedronQuadrature(Quadrature):
             p = [
                 QuadraturePoint([0.25, 0.25, 0.25], 1.0 / 6.0)
             ]
-        elif self._order == 2:
+        else:
             p = [
                 QuadraturePoint([(5.0 + 3.0 * sqrt(5.0)) / 20.0, (5.0 - sqrt(5.0)) / 20.0, (5.0 - sqrt(5.0)) / 20.0], 0.25 / 6.0),
                 QuadraturePoint([(5.0 - sqrt(5.0)) / 20.0, (5.0 + 3.0 * sqrt(5.0)) / 20.0, (5.0 - sqrt(5.0)) / 20.0], 0.25 / 6.0),
                 QuadraturePoint([(5.0 - sqrt(5.0)) / 20.0, (5.0 - sqrt(5.0)) / 20.0, (5.0 + 3.0 * sqrt(5.0)) / 20.0], 0.25 / 6.0),
                 QuadraturePoint([(5.0 - sqrt(5.0)) / 20.0, (5.0 - sqrt(5.0)) / 20.0, (5.0 - sqrt(5.0)) / 20.0],       0.25 / 6.0)
-            ]
-        else:
-            p = [
-                QuadraturePoint([1.0 / 4.0, 1.0 / 4.0, 1.0 / 4.0], -2.0 / 15.0),
-                QuadraturePoint([1.0 / 4.0, 1.0 / 6.0, 1.0 / 6.0], 3.0 / 40.0),
-                QuadraturePoint([1.0 / 6.0, 1.0 / 4.0, 1.0 / 6.0], 3.0 / 40.0),
-                QuadraturePoint([1.0 / 6.0, 1.0 / 6.0, 1.0 / 4.0], 3.0 / 40.0),
-                QuadraturePoint([1.0 / 6.0, 1.0 / 6.0, 1.0 / 6.0], 3.0 / 40.0)
             ]
         return p
 
