@@ -17,10 +17,10 @@ class IsoQuad4(FeaElement):
         :param nodes: a list of nodes in the counterclockwise direction
         """
         super().__init__(nodes)
-        if len(nodes) != 4:
+        self._node_number = len(nodes)
+        if self._node_number != 4:
             raise Exception("IsoQuad4 requires 4 nodes to be built.")
         self._jacobian = 0.0
-        self._node_number = 4
         self._shapes = []
         self._derivatives = []
         self._x = np.array([node.x for node in self._nodes])
@@ -55,7 +55,7 @@ class IsoQuad4(FeaElement):
         inverted_jacobi = np.linalg.inv(jacobi)
         shape_dx = inverted_jacobi[0, 0] * shape_dxi + inverted_jacobi[0, 1] * shape_deta
         shape_dy = inverted_jacobi[1, 0] * shape_dxi + inverted_jacobi[1, 1] * shape_deta
-        self._derivatives = [[shape_dx], [shape_dy]]
+        self._derivatives = [shape_dx, shape_dy]
 
     def jacobian(self) -> float:
         return self._jacobian
@@ -67,42 +67,72 @@ class IsoQuad4(FeaElement):
         return np.array(self._derivatives)
 
 
-def cosine(a: np.ndarray, b: np.ndarray, c: np.ndarray):
-    """
-    Build the direction cosine matrix for the triangle defined by three vertices
-
-    :param a: Coordinates of the first vertex as `np.array`
-    :param b: Coordinates of the second vertex as `np.array`
-    :param c: Coordinates of the third vertex as `np.array`
-    :return: The direction cosine matrix as `np.array`
-    """
-    ab = b - a
-    ac = c - a
-    n = np.cross(ab, ac)
-    vx = ab / np.linalg.norm(ab, ord=2)
-    vz = n / np.linalg.norm(n, ord=2)
-    vy = np.cross(vz, vx)
-    # print n, n[0] / norm(n, ord=2), n[1] / norm(n, ord=2), n[2] / norm(n, ord=2), norm(n, ord=2)
-    l = np.array([
-        [vx[0], vx[1], vx[2]],
-        [vy[0], vy[1], vy[2]],
-        [vz[0], vz[1], vz[2]]
-    ])
-    return l
-
-
-class IsoQuad4S(IsoQuad4):
-    """The surface 4-nodes isoparametric element for a quadrilateral."""
+class IsoQuad8(FeaElement):
+    """The plane 8-nodes isoparametric element for a quadrilateral."""
 
     def __init__(self, nodes: List[Node]):
-        super().__init__(nodes)
-        a = nodes[0].coords
-        b = nodes[1].coords
-        c = nodes[2].coords
-        self._cosine_matrix = cosine(a, b, c)
-        local_coordinates = [self._cosine_matrix.dot(node.coords - a) for node in nodes]  # type: List[np.ndarray]
-        self._x = [lc[0] for lc in local_coordinates]
-        self._y = [lc[1] for lc in local_coordinates]
+        """
+        Create an isoparametric element for a quadrilateral.
 
-    def cosine_matrix(self):
-        return self._cosine_matrix
+        :param nodes: a list of nodes in the counterclockwise direction
+        """
+        super().__init__(nodes)
+        self._node_number = len(nodes)
+        if self._node_number != 8:
+            raise Exception("IsoQuad8 requires 8 nodes to be built.")
+        self._jacobian = 0.0
+        self._shapes = []
+        self._derivatives = []
+        self._x = np.array([node.x for node in self._nodes])
+        self._y = np.array([node.y for node in self._nodes])
+        self._weights = np.array(
+            [
+                [-0.25,    0,    0,  0.25,    0.25,    0.25, -0.25, -0.25],
+                [-0.25,    0,    0, -0.25,    0.25,    0.25, -0.25,  0.25],
+                [-0.25,    0,    0,  0.25,    0.25,    0.25,  0.25,  0.25],
+                [-0.25,    0,    0, -0.25,    0.25,    0.25,  0.25, -0.25],
+                [0.5,      0, -0.5,     0,    -0.5,       0,   0.5,     0],
+                [0.5,    0.5,    0,     0,       0,    -0.5,      0, -0.5],
+                [0.5,      0,  0.5,     0,    -0.5,       0,   -0.5,    0],
+                [0.5,   -0.5,    0,     0,       0,    -0.5,      0,  0.5]
+            ],
+            dtype=float
+        )
+
+    def build(self, point: QuadraturePoint):
+        xi = point.xi
+        eta = point.eta
+        n = np.array(
+            [1, xi, eta, xi * eta, xi * xi, eta * eta, xi * xi * eta, xi * eta * eta],
+            dtype=float
+        )  # 1,	x,	y,	xy,	x^2,	y^2,	x^2 y,	x y^2
+        dndxi = np.array(
+            [0, 1, 0, eta, 2.0 * xi, 0, 2.0 * xi * eta, eta * eta],
+            dtype=float
+        )  # 0,	1,	0,	y,	2x,	0,	2xy,	y^2
+        dndeta = np.array(
+            [0, 0, 1, xi, 0, 2.0 * eta, xi * xi, 2.0 * xi * eta],
+            dtype=float
+        )  # 0,	0,	1,	x,	0,	2y,	x^2,	2xy
+
+        self._shapes = np.dot(self._weights, n)  # shape functions
+        shape_dxi = np.dot(self._weights, dndxi)  # derivatives of the shape functions in the first parametric direction
+        shape_deta = np.dot(self._weights, dndeta)  # derivatives of the shape functions in the second parametric direction
+        jacobi = np.array([
+            [np.sum(shape_dxi * self._x), np.sum(shape_dxi * self._y)],
+            [np.sum(shape_deta * self._x), np.sum(shape_deta * self._y)]
+        ])  # Jacobi matrix
+        self._jacobian = np.linalg.det(jacobi)
+        inverted_jacobi = np.linalg.inv(jacobi)
+        shape_dx = inverted_jacobi[0, 0] * shape_dxi + inverted_jacobi[0, 1] * shape_deta
+        shape_dy = inverted_jacobi[1, 0] * shape_dxi + inverted_jacobi[1, 1] * shape_deta
+        self._derivatives = [shape_dx, shape_dy]
+
+    def jacobian(self) -> float:
+        return self._jacobian
+
+    def shapes(self) -> np.ndarray:
+        return np.array(self._shapes)
+
+    def derivatives(self) -> np.ndarray:
+        return np.array(self._derivatives)
