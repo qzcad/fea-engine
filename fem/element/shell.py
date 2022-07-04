@@ -5,7 +5,7 @@ import numpy as np
 from mesh.node import Node
 
 
-class ShellElement:
+class ShellElementTransformer:
     def __init__(self, nodes: List[Node]):
         self._nodes = nodes
         if len(nodes) < 3:
@@ -47,10 +47,9 @@ class ShellElement:
         vx = ab / np.linalg.norm(ab, ord=2)
         vz = n / np.linalg.norm(n, ord=2)
         vy = np.cross(vz, vx)
-        # print n, n[0] / norm(n, ord=2), n[1] / norm(n, ord=2), n[2] / norm(n, ord=2), norm(n, ord=2)
-        l = np.array([
+        cosine_matrix = np.array([
             [vx[0], vx[1], vx[2]],
             [vy[0], vy[1], vy[2]],
             [vz[0], vz[1], vz[2]]
         ])
-        return l
+        return cosine_matrix
