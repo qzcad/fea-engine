@@ -33,7 +33,7 @@ class Mesh:
 
     def append_point(self, coords: Iterable[float], node_type: NodeType, check: bool = True) -> Node:
         if check:
-            node = next((n for n in self._nodes if n.to_point(coords) < self._epsilon), None)
+            node = next((n for n in self._nodes if np.allclose(n.coords, coords)), None)
             if node is not None:
                 return node
         node = Node(coords, node_type, self._node_id)

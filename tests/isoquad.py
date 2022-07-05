@@ -7,7 +7,7 @@ from fem.quadrature.legendre import QuadrilateralQuadrature
 from mesh.node import Node, NodeType
 
 
-class TestLegendre(TestCase):
+class TestIsoQuad(TestCase):
     def setUp(self) -> None:
         self.q = 1.0
         self.order = 3

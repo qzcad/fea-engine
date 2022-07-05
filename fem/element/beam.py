@@ -43,9 +43,14 @@ class IsoBeam2(FeaElement):
 
 
 class IsoBeam3(FeaElement):
-    """1D 3-nodes isoparametric element for a beam."""
+    """1D 3-nodes isoparametric element for a beam. Order is following a__(a+b)/2__b: 0 - a, 1 - b, 2 - (a+b)/2"""
 
     def __init__(self, nodes: List[Node]):
+        """
+        Create a 3 nodes beam element.
+
+        :param nodes: a list of nodes, node[0] - is the left node (a), node[1] is the right node (b), node[2] - is the middle of the interval [a; b]
+        """
         super().__init__(nodes)
         self._node_number = len(nodes)
         if self._node_number != 3:
@@ -59,13 +64,13 @@ class IsoBeam3(FeaElement):
         xi = point.xi
         self._shapes = [
             xi * (xi - 1.0) / 2.0,
-            1.0 - xi * xi,
-            xi * (xi + 1.0) / 2.0
+            xi * (xi + 1.0) / 2.0,
+            1.0 - xi * xi
         ]  # quadratic shape functions
         shape_dxi = np.array([
             xi - 0.5,
-            -2.0 * xi,
-            xi + 0.5
+            xi + 0.5,
+            -2.0 * xi
         ])  # derivatives of the shape functions in the first parametric direction
         jacobi = np.sum(shape_dxi * self._x)
         self._jacobian = jacobi  # j = l / 2
